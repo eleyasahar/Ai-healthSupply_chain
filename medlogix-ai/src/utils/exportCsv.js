@@ -1,0 +1,40 @@
+// src/utils/exportCsv.js
+
+/**
+ * Converts array of objects to CSV format and triggers browser download
+ * @param {Array<Object>} data - Array of records
+ * @param {string} filename - Target file name
+ */
+export const downloadAsCSV = (data, filename = 'export.csv') => {
+  if (!data || !data.length) return;
+
+  // Extract headers
+  const headers = Object.keys(data[0]);
+
+  // Build CSV rows
+  const csvRows = [
+    headers.join(','), // Header row
+    ...data.map((row) =>
+      headers
+        .map((header) => {
+          const value = row[header] ?? '';
+          // Escape quotes and commas
+          const escaped = String(value).replace(/"/g, '""');
+          return `"${escaped}"`;
+        })
+        .join(',')
+    ),
+  ];
+
+  const csvString = csvRows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
